@@ -16,21 +16,19 @@ struct DashboardView: View {
                     .bold()
                     .padding()
 
-                Text("Select Difficulty")
-                    .font(.title2)
-
-                NavigationLink("Easy (3x2)", value: Difficulty.easy)
+                NavigationLink("Easy (3×3)", value: Difficulty.easy)
                     .buttonStyle(DifficultyButtonStyle())
 
-                NavigationLink("Medium (4x4)", value: Difficulty.medium)
+                NavigationLink("Medium (5×5)", value: Difficulty.medium)
                     .buttonStyle(DifficultyButtonStyle())
 
-                NavigationLink("Hard (6x6)", value: Difficulty.hard)
+                NavigationLink("Hard (7×7)", value: Difficulty.hard)
                     .buttonStyle(DifficultyButtonStyle())
             }
             .navigationDestination(for: Difficulty.self) { difficulty in
                 GameView(difficulty: difficulty)
             }
+            .padding()
         }
     }
 }
@@ -40,26 +38,33 @@ enum Difficulty: Hashable {
 
     var gridSize: (rows: Int, cols: Int) {
         switch self {
-        case .easy: return (3, 2)
-        case .medium: return (4, 4)
-        case .hard: return (6, 6)
+        case .easy: return (3, 3)   // 9 tiles
+        case .medium: return (5, 5) // 25 tiles
+        case .hard: return (7, 7)   // 49 tiles
         }
     }
 
+    var totalTiles: Int {
+        gridSize.rows * gridSize.cols
+    }
+
     var pairsCount: Int {
-        let totalTiles = gridSize.rows * gridSize.cols
-        return totalTiles / 2
+        // 1 extra tile reserved for block icon
+        // So pairs count = (totalTiles - 1) / 2
+        (totalTiles - 1) / 2
     }
 }
+
 
 struct DifficultyButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .frame(width: 200, height: 50)
-            .background(Color.pastelBlue.opacity(configuration.isPressed ? 0.6 : 1))
+            .frame(width: 220, height: 50)
+            .background(configuration.isPressed ? Color.blue.opacity(0.7) : Color.blue)
             .foregroundColor(.white)
-            .cornerRadius(12)
+            .cornerRadius(15)
             .font(.headline)
+            .shadow(radius: 5)
             .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
 }

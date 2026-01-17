@@ -11,7 +11,8 @@ import SwiftUI
 struct Color_Match_Memory_GameApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            DashboardView()  // Start here with difficulty selection
         }
     }
 }
+
