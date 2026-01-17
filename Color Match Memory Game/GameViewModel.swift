@@ -5,10 +5,10 @@
 //
 //  Created by Vihanga Madushamini on 2026-01-17.
 //
-
 import SwiftUI
-
+import Combine   // 
 class GameViewModel: ObservableObject {
+
     @Published var tiles: [Tile] = []
     private var firstSelectedIndex: Int? = nil
 
@@ -19,7 +19,6 @@ class GameViewModel: ObservableObject {
     func setupGame() {
         let colors: [Color] = [.red, .blue, .green, .orange, .purple, .pink]
         let pairedColors = (colors + colors).shuffled()
-
         tiles = pairedColors.map { Tile(color: $0) }
     }
 
