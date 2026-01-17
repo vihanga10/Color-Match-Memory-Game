@@ -16,13 +16,12 @@ class GameViewModel: ObservableObject {
 
     private var firstSelectedIndex: Int? = nil
     private var difficulty: Difficulty?
-    
+
     func resetGame(difficulty: Difficulty) {
         self.difficulty = difficulty
         score = 0
         firstSelectedIndex = nil
 
-        // Generate tile pairs using pastel colors
         let pastelColors = Color.pastelColors
         let pairsNeeded = difficulty.pairsCount
 
@@ -30,11 +29,19 @@ class GameViewModel: ObservableObject {
         selectedColors += selectedColors // duplicate for pairs
         selectedColors.shuffle()
 
+        // Add one extra tile for the block icon
+        selectedColors.append(.clear) // temporary placeholder
+
         tiles = selectedColors.map { Tile(color: $0) }
+
+        // Replace last tile color with a special color to indicate block tile
+        if let lastIndex = tiles.indices.last {
+            tiles[lastIndex].isBlock = true
+        }
     }
 
     func selectTile(_ index: Int) {
-        guard !tiles[index].isFlipped, !tiles[index].isMatched else { return }
+        guard !tiles[index].isFlipped, !tiles[index].isMatched, !tiles[index].isBlock else { return }
 
         tiles[index].isFlipped = true
 
@@ -54,9 +61,5 @@ class GameViewModel: ObservableObject {
         } else {
             firstSelectedIndex = index
         }
-    }
-
-    func goBack() {
-        // Navigation handled by NavigationStack, no action needed here
     }
 }
