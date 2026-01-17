@@ -5,45 +5,58 @@
 //
 //  Created by Vihanga Madushamini on 2026-01-17.
 //
+
 import SwiftUI
-import Combine   // 
+import Combine
+
 class GameViewModel: ObservableObject {
 
     @Published var tiles: [Tile] = []
+    @Published var score: Int = 0
+
     private var firstSelectedIndex: Int? = nil
+    private var difficulty: Difficulty?
+    
+    func resetGame(difficulty: Difficulty) {
+        self.difficulty = difficulty
+        score = 0
+        firstSelectedIndex = nil
 
-    init() {
-        setupGame()
-    }
+        // Generate tile pairs using pastel colors
+        let pastelColors = Color.pastelColors
+        let pairsNeeded = difficulty.pairsCount
 
-    func setupGame() {
-        let colors: [Color] = [.red, .blue, .green, .orange, .purple, .pink]
-        let pairedColors = (colors + colors).shuffled()
-        tiles = pairedColors.map { Tile(color: $0) }
+        var selectedColors = Array(pastelColors.prefix(pairsNeeded))
+        selectedColors += selectedColors // duplicate for pairs
+        selectedColors.shuffle()
+
+        tiles = selectedColors.map { Tile(color: $0) }
     }
 
     func selectTile(_ index: Int) {
-        if tiles[index].isFlipped || tiles[index].isMatched { return }
+        guard !tiles[index].isFlipped, !tiles[index].isMatched else { return }
 
         tiles[index].isFlipped = true
 
         if let firstIndex = firstSelectedIndex {
-            checkMatch(firstIndex, index)
-            firstSelectedIndex = nil
+            if tiles[firstIndex].color == tiles[index].color {
+                tiles[firstIndex].isMatched = true
+                tiles[index].isMatched = true
+                score += 1
+                firstSelectedIndex = nil
+            } else {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.tiles[firstIndex].isFlipped = false
+                    self.tiles[index].isFlipped = false
+                    self.firstSelectedIndex = nil
+                }
+            }
         } else {
             firstSelectedIndex = index
         }
     }
 
-    private func checkMatch(_ first: Int, _ second: Int) {
-        if tiles[first].color == tiles[second].color {
-            tiles[first].isMatched = true
-            tiles[second].isMatched = true
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                self.tiles[first].isFlipped = false
-                self.tiles[second].isFlipped = false
-            }
-        }
+    func goBack() {
+        // Navigation handled by NavigationStack, no action needed here
     }
 }
