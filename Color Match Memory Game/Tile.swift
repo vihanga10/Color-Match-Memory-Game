@@ -2,10 +2,14 @@ import SwiftUI
 
 struct Tile: Identifiable {
     let id = UUID()
-    let color: Color
-    var isFlipped: Bool = false
-    var isMatched: Bool = false
+    let color: Color?
+    
+    var isFlipped = false
+    var isMatched = false
+    var isBonus = false
 }
+
+
 //
 //  Tile.swift
 //  Color Match Memory Game

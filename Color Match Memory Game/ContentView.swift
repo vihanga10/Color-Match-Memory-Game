@@ -18,7 +18,7 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Text("🎨 Color Match Memory Game")
+            Text(" Color Match Memory Game")
                 .font(.title)
                 .padding()
 
@@ -35,15 +35,3 @@ struct ContentView: View {
     }
 }
 
-struct TileView: View {
-    let tile: Tile
-
-    var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(tile.isFlipped || tile.isMatched ? tile.color : Color.gray)
-                .frame(height: 80)
-                .animation(.easeInOut, value: tile.isFlipped)
-        }
-    }
-}

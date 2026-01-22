@@ -4,43 +4,128 @@
 //
 //  Created by Vihanga Madushamini on 2026-01-17.
 //
-
 import SwiftUI
 
+// MARK: - Dashboard View
 struct DashboardView: View {
     var body: some View {
         NavigationStack {
-            VStack(spacing: 30) {
-                Text("BrainHue")
-                    .font(.largeTitle)
-                    .bold()
-                    .padding()
+            ZStack {
+                LinearGradient(
+                    colors: [
+                        Color.white,
+                        Color(red: 183/255, green: 211/255, blue: 228/255) // #B7D3E4
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
 
-                NavigationLink("Easy (3×3)", value: Difficulty.easy)
-                    .buttonStyle(DifficultyButtonStyle())
+                VStack(spacing: 35) {
 
-                NavigationLink("Medium (5×5)", value: Difficulty.medium)
-                    .buttonStyle(DifficultyButtonStyle())
+                    Text("BRAIN HUE")
+                        .font(.system(size: 36, weight: .bold))
+                        .foregroundColor(Color(red: 55/255, green: 100/255, blue: 140/255))
+                        .padding(.top, 40)
 
-                NavigationLink("Hard (7×7)", value: Difficulty.hard)
-                    .buttonStyle(DifficultyButtonStyle())
+                    LevelButton(
+                        title: "Beginner Level",
+                        imageName: "beginner_icon",
+                        difficulty: .easy
+                    )
+
+                    LevelButton(
+                        title: "Intermediate Level",
+                        imageName: "intermediate_icon",
+                        difficulty: .medium
+                    )
+
+                    LevelButton(
+                        title: "Master Level",
+                        imageName: "master_icon",
+                        difficulty: .hard
+                    )
+
+                    Spacer()
+
+                    Button("LEADERBOARD") { }
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(width: 360, height: 45)
+                        .background(
+                            Color(red: 79/255, green: 113/255, blue: 145/255) // #4F7191
+                        )
+                        .cornerRadius(5)
+                        .shadow(color: .black.opacity(0.25), radius: 6, y: 4)
+                        .padding(.bottom, 30)
+                }
             }
-            .navigationDestination(for: Difficulty.self) { difficulty in
-                GameView(difficulty: difficulty)
-            }
-            .padding()
         }
     }
 }
+
+struct LevelButton: View {
+    let title: String
+    let imageName: String
+    let difficulty: Difficulty
+
+    @State private var isHovering = false
+
+    var body: some View {
+        VStack(spacing: 12) {
+
+            NavigationLink {
+                PlayerInfoView(difficulty: difficulty)
+            } label: {
+
+                ZStack {
+                    Circle()
+                        .fill(Color.white)
+                        .frame(width: 110, height: 110)
+
+                    Circle()
+                        .stroke(
+                            Color(red: 176/255, green: 201/255, blue: 224/255), // #B0C9E0
+                            lineWidth: 6
+                        )
+                        .frame(width: 110, height: 110)
+
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 70, height: 70)
+                }
+                .scaleEffect(isHovering ? 1.08 : 1.0)
+                .shadow(
+                    color: Color(red: 176/255, green: 201/255, blue: 224/255)
+                        .opacity(isHovering ? 0.6 : 0),
+                    radius: isHovering ? 14 : 0
+                )
+                .animation(.easeInOut(duration: 0.25), value: isHovering)
+
+            }
+            .buttonStyle(.plain)
+            .onHover { isHovering = $0 }
+
+            Text(title)
+                .font(.system(size: 17, weight: .medium))
+                .foregroundColor(Color(red: 31/255, green: 64/255, blue: 104/255)) // #1F4068
+
+        }
+    }
+}
+
+
+
 
 enum Difficulty: Hashable {
     case easy, medium, hard
 
     var gridSize: (rows: Int, cols: Int) {
         switch self {
-        case .easy: return (3, 3)   // 9 tiles
-        case .medium: return (5, 5) // 25 tiles
-        case .hard: return (7, 7)   // 49 tiles
+        case .easy: return (rows: 3, cols: 3)
+        case .medium: return (rows: 5, cols: 5)
+        case .hard: return (rows: 7, cols: 7)
         }
     }
 
@@ -49,22 +134,6 @@ enum Difficulty: Hashable {
     }
 
     var pairsCount: Int {
-        // 1 extra tile reserved for block icon
-        // So pairs count = (totalTiles - 1) / 2
         (totalTiles - 1) / 2
-    }
-}
-
-
-struct DifficultyButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .frame(width: 220, height: 50)
-            .background(configuration.isPressed ? Color.blue.opacity(0.7) : Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(15)
-            .font(.headline)
-            .shadow(radius: 5)
-            .scaleEffect(configuration.isPressed ? 0.95 : 1)
     }
 }
