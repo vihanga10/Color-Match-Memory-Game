@@ -4,29 +4,60 @@
 //
 //  Created by Vihanga Madushamini on 2026-01-17.
 //
-
 import SwiftUI
 
 extension Color {
-    static let pastelPink = Color(red: 0.98, green: 0.83, blue: 0.87)
-    static let pastelBlue = Color(red: 0.83, green: 0.93, blue: 0.95)
-    static let pastelYellow = Color(red: 0.99, green: 0.95, blue: 0.80)
-    static let pastelGreen = Color(red: 0.85, green: 0.91, blue: 0.84)
-    static let pastelPurple = Color(red: 0.93, green: 0.87, blue: 0.96)
-    static let pastelOrange = Color(red: 0.96, green: 0.88, blue: 0.80)
 
-    static let pastelColors: [Color] = [
-        .pastelPink,
-        .pastelBlue,
-        .pastelYellow,
-        .pastelGreen,
-        .pastelPurple,
-        .pastelOrange,
-        Color(red: 0.90, green: 0.95, blue: 0.96),
-        Color(red: 0.96, green: 0.92, blue: 0.92),
-        Color(red: 0.87, green: 0.92, blue: 0.90),
-        Color(red: 0.93, green: 0.90, blue: 0.88),
-        Color(red: 0.90, green: 0.89, blue: 0.94),
-        Color(red: 0.94, green: 0.90, blue: 0.90)
+    // MARK: - Color Families (Distinct groups)
+    static let redFamily: [Color] = [
+        Color(red: 1.00, green: 0.60, blue: 0.60),
+        Color(red: 0.96, green: 0.48, blue: 0.62)
+    ]
+
+    static let orangeFamily: [Color] = [
+        Color(red: 1.00, green: 0.72, blue: 0.48),
+        Color(red: 0.98, green: 0.67, blue: 0.52)
+    ]
+
+    static let yellowFamily: [Color] = [
+        Color(red: 1.00, green: 0.94, blue: 0.50),
+        Color(red: 0.95, green: 0.87, blue: 0.52)
+    ]
+
+    static let greenFamily: [Color] = [
+        Color(red: 0.60, green: 0.90, blue: 0.60),
+        Color(red: 0.48, green: 0.85, blue: 0.70)
+    ]
+
+    static let blueFamily: [Color] = [
+        Color(red: 0.55, green: 0.75, blue: 0.95),
+        Color(red: 0.38, green: 0.60, blue: 0.85)
+    ]
+
+    static let purpleFamily: [Color] = [
+        Color(red: 0.78, green: 0.65, blue: 0.95),
+        Color(red: 0.65, green: 0.50, blue: 0.88)
+    ]
+
+    static let tealFamily: [Color] = [
+        Color(red: 0.45, green: 0.85, blue: 0.90),
+        Color(red: 0.30, green: 0.70, blue: 0.75)
+    ]
+
+    static let brownFamily: [Color] = [
+        Color(red: 0.85, green: 0.75, blue: 0.65),
+        Color(red: 0.90, green: 0.80, blue: 0.70)
+    ]
+
+    /// All families together
+    static let colorFamilies: [[Color]] = [
+        redFamily,
+        orangeFamily,
+        yellowFamily,
+        greenFamily,
+        blueFamily,
+        purpleFamily,
+        tealFamily,
+        brownFamily
     ]
 }

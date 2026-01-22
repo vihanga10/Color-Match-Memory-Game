@@ -28,33 +28,51 @@ class GameViewModel: ObservableObject {
 
         startTimer()
 
-        let pastelColors = Array(Color.pastelColors.prefix(difficulty.pairsCount))
+        let families = Color.colorFamilies.shuffled()
+        let neededPairs = difficulty.pairsCount
+
+        var selectedColors: [Color] = []
+
+        for family in families {
+            if let color = family.randomElement() {
+                selectedColors.append(color)
+            }
+            if selectedColors.count == neededPairs { break }
+        }
+
         var tilesArray: [Tile] = []
 
-        // Create pairs
-        for color in pastelColors {
+        for color in selectedColors {
             tilesArray.append(Tile(color: color))
             tilesArray.append(Tile(color: color))
         }
 
-        // Add ONE bonus tile
+        // Add bonus tile
         tilesArray.append(Tile(color: nil, isBonus: true))
 
         tilesArray.shuffle()
         tiles = tilesArray
+
     }
 
     func selectTile(_ index: Int) {
         guard !tiles[index].isFlipped,
               !tiles[index].isMatched else { return }
 
-        tiles[index].isFlipped = true
-
-        // Bonus tile
+        // 🔵 BONUS TILE LOGIC
         if tiles[index].isBonus {
+            tiles[index].isFlipped = true
             score = min(score + 1, 5)
+
+            // Auto close instantly
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+                self.tiles[index].isFlipped = false
+            }
             return
         }
+
+        // 🔹 NORMAL TILE LOGIC
+        tiles[index].isFlipped = true
 
         if let firstIndex = firstSelectedIndex {
             moves += 1
@@ -64,7 +82,7 @@ class GameViewModel: ObservableObject {
                 tiles[index].isMatched = true
                 score = min(score + 1, 5)
 
-                // Extra point for completing all 4 pairs
+                // Extra point when all 4 pairs are matched
                 if tiles.filter({ $0.isMatched }).count == 8 {
                     score = min(score + 1, 5)
                 }
@@ -81,6 +99,7 @@ class GameViewModel: ObservableObject {
             firstSelectedIndex = index
         }
     }
+
 
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
