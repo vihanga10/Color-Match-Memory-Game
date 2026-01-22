@@ -4,6 +4,8 @@
 //
 //  Created by Vihanga Madushamini on 2026-01-17.
 //
+
+
 import SwiftUI
 
 struct GameView: View {
@@ -16,7 +18,7 @@ struct GameView: View {
 
     private var columns: [GridItem] {
         Array(
-            repeating: GridItem(.flexible(), spacing: 12),
+            repeating: GridItem(.flexible(), spacing: 14),
             count: difficulty.gridSize.cols
         )
     }
@@ -34,44 +36,20 @@ struct GameView: View {
             )
             .ignoresSafeArea()
 
-            VStack(spacing: 20) {
+            VStack(spacing: 18) {
 
-                // Top Bar
-                HStack {
-                    NavigationLink(destination: DashboardView()) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                            .foregroundColor(Color(red: 55/255, green: 100/255, blue: 140/255))
-                    }
-
-                    Spacer()
-
-                    Button {
-                        viewModel.resetGame(difficulty: difficulty)
-                    } label: {
-                        Text("RESET")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 8)
-                            .background(Color.red)
-                            .cornerRadius(6)
-                            .shadow(radius: 4)
-                    }
-                }
-                .padding(.horizontal)
-
-                // Level Title
+                // 🔹 LEVEL TITLE (moved UP)
                 Text(levelTitle)
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 55/255, green: 100/255, blue: 140/255))
+                    .padding(.top, 20)
 
-                // Player Name
+                // Player name
                 Text("Hello \(playerName) !")
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(Color(red: 55/255, green: 100/255, blue: 140/255))
 
-                // Level Progress (1–2–3)
+                // Level progress
                 HStack(spacing: 0) {
                     levelCircle(number: 1, active: true)
                     Rectangle()
@@ -87,7 +65,7 @@ struct GameView: View {
                 }
                 .padding(.vertical, 10)
 
-                // Game Grid
+                // Game grid
                 LazyVGrid(columns: columns, spacing: 14) {
                     ForEach(viewModel.tiles.indices, id: \.self) { index in
                         TileView(tile: viewModel.tiles[index])
@@ -99,7 +77,7 @@ struct GameView: View {
                 }
                 .padding(.horizontal)
 
-                // Stats Section
+                // Stats
                 HStack {
                     statView(title: "TIME", value: viewModel.formattedTime, color: .red)
                     statView(title: "MOVES", value: "\(viewModel.moves)", color: .black)
@@ -107,16 +85,31 @@ struct GameView: View {
                 }
                 .padding(.top, 10)
 
+                // 🔴 RESET BUTTON (moved BELOW stats)
+                Button {
+                    viewModel.resetGame(difficulty: difficulty)
+                } label: {
+                    Text("RESET")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 45)
+                        .background(Color.red)
+                        .cornerRadius(6)
+                        .shadow(radius: 6)
+                }
+                .padding(.horizontal, 30)
+                .padding(.top, 10)
+
                 Spacer()
             }
-            .padding(.top)
         }
         .onAppear {
             viewModel.resetGame(difficulty: difficulty)
         }
     }
 
-    // MARK: - Components
+    // MARK: - Helpers
 
     private var levelTitle: String {
         switch difficulty {
@@ -140,7 +133,11 @@ struct GameView: View {
     private func levelCircle(number: Int, active: Bool) -> some View {
         ZStack {
             Circle()
-                .fill(active ? Color(red: 79/255, green: 113/255, blue: 145/255) : Color.gray.opacity(0.3))
+                .fill(
+                    active
+                    ? Color(red: 79/255, green: 113/255, blue: 145/255)
+                    : Color.gray.opacity(0.3)
+                )
                 .frame(width: 40, height: 40)
 
             Text("\(number)")
