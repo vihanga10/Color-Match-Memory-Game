@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-// MARK: - Dashboard View
+
 struct DashboardView: View {
     var body: some View {
         NavigationStack {
@@ -123,17 +123,27 @@ enum Difficulty: Hashable {
 
     var gridSize: (rows: Int, cols: Int) {
         switch self {
-        case .easy: return (rows: 3, cols: 3)
-        case .medium: return (rows: 5, cols: 5)
-        case .hard: return (rows: 7, cols: 7)
+        case .easy: return (3, 3)
+        case .medium: return (5, 5)
+        case .hard: return (7, 7)
         }
     }
 
-    var totalTiles: Int {
-        gridSize.rows * gridSize.cols
+    var pairsCount: Int {
+        switch self {
+        case .easy: return 4
+        case .medium: return 12
+        case .hard: return 24
+        }
     }
 
-    var pairsCount: Int {
-        (totalTiles - 1) / 2
+    var bonusTiles: Int {
+        1
+    }
+
+    var maxScore: Int {
+        pairsCount + bonusTiles
     }
 }
+
+

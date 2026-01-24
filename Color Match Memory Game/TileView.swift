@@ -1,8 +1,5 @@
-//
+
 //  TileView.swift
-//  Color Match Memory Game
-//
-//  Created by Vihanga Madushamini on 2026-01-17.
 
 import SwiftUI
 
@@ -26,7 +23,7 @@ struct TileView: View {
                 }
             }
         }
-        .frame(height: 80)
+        .aspectRatio(1, contentMode: .fit)   
         .animation(.easeInOut(duration: 0.25), value: tile.isFlipped)
     }
 }

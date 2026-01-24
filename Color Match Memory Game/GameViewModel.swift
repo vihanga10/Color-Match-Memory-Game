@@ -18,60 +18,66 @@ class GameViewModel: ObservableObject {
 
     private var firstSelectedIndex: Int?
     private var timer: Timer?
+    private var difficulty: Difficulty!
 
+    private var bonusTileOpened = false   // 🔑 KEY FIX
+
+    // MARK: - RESET GAME
     func resetGame(difficulty: Difficulty) {
+        self.difficulty = difficulty
+
         score = 0
         moves = 0
         secondsElapsed = 0
         firstSelectedIndex = nil
+        bonusTileOpened = false
         timer?.invalidate()
 
         startTimer()
 
         let families = Color.colorFamilies.shuffled()
-        let neededPairs = difficulty.pairsCount
-
         var selectedColors: [Color] = []
 
+        // Pick colors for pairs
         for family in families {
             if let color = family.randomElement() {
                 selectedColors.append(color)
             }
-            if selectedColors.count == neededPairs { break }
+            if selectedColors.count == difficulty.pairsCount { break }
         }
 
         var tilesArray: [Tile] = []
 
+        // Create pairs
         for color in selectedColors {
             tilesArray.append(Tile(color: color))
             tilesArray.append(Tile(color: color))
         }
 
-        // Add bonus tile
+        // Add ONE bonus tile
         tilesArray.append(Tile(color: nil, isBonus: true))
 
         tilesArray.shuffle()
         tiles = tilesArray
-
     }
 
+    // MARK: - TILE SELECTION
     func selectTile(_ index: Int) {
         guard !tiles[index].isFlipped,
               !tiles[index].isMatched else { return }
 
-        // 🔵 BONUS TILE LOGIC
+        // 🔵 BONUS TILE (NO FREE POINTS)
         if tiles[index].isBonus {
+            bonusTileOpened = true
             tiles[index].isFlipped = true
-            score = min(score + 1, 5)
 
-            // Auto close instantly
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
                 self.tiles[index].isFlipped = false
             }
             return
         }
 
-        // 🔹 NORMAL TILE LOGIC
+        // 🔹 NORMAL TILE
         tiles[index].isFlipped = true
 
         if let firstIndex = firstSelectedIndex {
@@ -80,14 +86,12 @@ class GameViewModel: ObservableObject {
             if tiles[firstIndex].color == tiles[index].color {
                 tiles[firstIndex].isMatched = true
                 tiles[index].isMatched = true
-                score = min(score + 1, 5)
-
-                // Extra point when all 4 pairs are matched
-                if tiles.filter({ $0.isMatched }).count == 8 {
-                    score = min(score + 1, 5)
-                }
+                score += 1
 
                 firstSelectedIndex = nil
+
+                checkForCompletionBonus()
+
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     self.tiles[firstIndex].isFlipped = false
@@ -100,7 +104,19 @@ class GameViewModel: ObservableObject {
         }
     }
 
+    // MARK: - COMPLETION BONUS
+    private func checkForCompletionBonus() {
+        let matchedPairs = tiles.filter { $0.isMatched }.count / 2
 
+        if matchedPairs == difficulty.pairsCount,
+           bonusTileOpened,
+           score == difficulty.pairsCount {
+
+            score += 1   // 🎯 FINAL BONUS POINT
+        }
+    }
+
+    // MARK: - TIMER
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             self.secondsElapsed += 1
@@ -110,6 +126,6 @@ class GameViewModel: ObservableObject {
     var formattedTime: String {
         let minutes = secondsElapsed / 60
         let seconds = secondsElapsed % 60
-        return String(format: "%02d.%02d min", minutes, seconds)
+        return String(format: "%02d:%02d", minutes, seconds)
     }
 }

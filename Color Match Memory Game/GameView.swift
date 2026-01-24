@@ -1,9 +1,4 @@
-//
 //  GameView.swift
-//  Color Match Memory Game
-//
-//  Created by Vihanga Madushamini on 2026-01-17.
-//
 
 
 import SwiftUI
@@ -65,17 +60,19 @@ struct GameView: View {
                 }
                 .padding(.vertical, 10)
 
-                // Game grid
-                LazyVGrid(columns: columns, spacing: 14) {
-                    ForEach(viewModel.tiles.indices, id: \.self) { index in
-                        TileView(tile: viewModel.tiles[index])
-                            .onTapGesture {
-                                viewModel.selectTile(index)
-                            }
-                            .aspectRatio(1, contentMode: .fit)
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 14) {
+                        ForEach(viewModel.tiles.indices, id: \.self) { index in
+                            TileView(tile: viewModel.tiles[index])
+                                .onTapGesture {
+                                    viewModel.selectTile(index)
+                                }
+                                .aspectRatio(1, contentMode: .fit)
+                        }
                     }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+
 
                 // Stats
                 HStack {
@@ -101,8 +98,7 @@ struct GameView: View {
                 .padding(.horizontal, 30)
                 .padding(.top, 10)
 
-                Spacer()
-            }
+                            }
         }
         .onAppear {
             viewModel.resetGame(difficulty: difficulty)
