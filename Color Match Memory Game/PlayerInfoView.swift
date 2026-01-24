@@ -89,9 +89,9 @@ struct PlayerInfoView: View {
 
     private var difficultyTitle: String {
         switch difficulty {
-        case .easy: return "BEGINNER LEVEL"
-        case .medium: return "INTERMEDIATE LEVEL"
-        case .hard: return "MASTER LEVEL"
+        case .beginner: return "BEGINNER LEVEL"
+        case .intermediate: return "INTERMEDIATE LEVEL"
+        case .master: return "MASTER LEVEL"
         }
     }
 }

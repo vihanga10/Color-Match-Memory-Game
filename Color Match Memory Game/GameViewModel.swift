@@ -1,28 +1,29 @@
 
-//
-//  GameViewModel.swift
-//  Color Match Memory Game
-//
-//  Created by Vihanga Madushamini on 2026-01-17.
-//
 
-import SwiftUI
+//  GameViewModel.swift
+
+
 import Combine
+import SwiftUI
 
 class GameViewModel: ObservableObject {
 
     @Published var tiles: [Tile] = []
-    @Published var score: Int = 0
-    @Published var moves: Int = 0
-    @Published var secondsElapsed: Int = 0
+    @Published var score = 0
+    @Published var moves = 0
+    @Published var secondsElapsed = 0
+    
 
     private var firstSelectedIndex: Int?
-    private var timer: Timer?
     private var difficulty: Difficulty!
+    private var timer: Timer?
+    var formattedTime: String {
+        let minutes = secondsElapsed / 60
+        let seconds = secondsElapsed % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
 
-    private var bonusTileOpened = false   // 🔑 KEY FIX
-
-    // MARK: - RESET GAME
+    // MARK: - GAME RESET
     func resetGame(difficulty: Difficulty) {
         self.difficulty = difficulty
 
@@ -30,26 +31,31 @@ class GameViewModel: ObservableObject {
         moves = 0
         secondsElapsed = 0
         firstSelectedIndex = nil
-        bonusTileOpened = false
-        timer?.invalidate()
 
+        timer?.invalidate()
         startTimer()
 
-        let families = Color.colorFamilies.shuffled()
-        var selectedColors: [Color] = []
+        generateTiles()
+    }
 
-        // Pick colors for pairs
-        for family in families {
-            if let color = family.randomElement() {
-                selectedColors.append(color)
-            }
-            if selectedColors.count == difficulty.pairsCount { break }
-        }
-
+    // MARK: - TILE GENERATION (THIS FIXES MISSING TILES)
+    private func generateTiles() {
         var tilesArray: [Tile] = []
 
+        // Flatten all colors
+        let baseColors = Color.colorFamilies.flatMap { $0 }
+
+        var generatedColors: [Color] = []
+        var colorIndex = 0
+
+        // 🔁 Reuse colors safely
+        while generatedColors.count < difficulty.pairsCount {
+            generatedColors.append(baseColors[colorIndex % baseColors.count])
+            colorIndex += 1
+        }
+
         // Create pairs
-        for color in selectedColors {
+        for color in generatedColors {
             tilesArray.append(Tile(color: color))
             tilesArray.append(Tile(color: color))
         }
@@ -61,24 +67,21 @@ class GameViewModel: ObservableObject {
         tiles = tilesArray
     }
 
+
     // MARK: - TILE SELECTION
     func selectTile(_ index: Int) {
         guard !tiles[index].isFlipped,
               !tiles[index].isMatched else { return }
 
-        // 🔵 BONUS TILE (NO FREE POINTS)
-        if tiles[index].isBonus {
-            bonusTileOpened = true
-            tiles[index].isFlipped = true
+        tiles[index].isFlipped = true
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+        // BONUS TILE → NO FREE POINT
+        if tiles[index].isBonus {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 self.tiles[index].isFlipped = false
             }
             return
         }
-
-        // 🔹 NORMAL TILE
-        tiles[index].isFlipped = true
 
         if let firstIndex = firstSelectedIndex {
             moves += 1
@@ -88,10 +91,13 @@ class GameViewModel: ObservableObject {
                 tiles[index].isMatched = true
                 score += 1
 
+                // 🎯 BONUS POINT ONLY WHEN ALL PAIRS MATCHED
+                let matchedPairs = tiles.filter { $0.isMatched }.count / 2
+                if matchedPairs == difficulty.pairsCount {
+                    score += 1 // bonus
+                }
+
                 firstSelectedIndex = nil
-
-                checkForCompletionBonus()
-
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                     self.tiles[firstIndex].isFlipped = false
@@ -104,28 +110,11 @@ class GameViewModel: ObservableObject {
         }
     }
 
-    // MARK: - COMPLETION BONUS
-    private func checkForCompletionBonus() {
-        let matchedPairs = tiles.filter { $0.isMatched }.count / 2
-
-        if matchedPairs == difficulty.pairsCount,
-           bonusTileOpened,
-           score == difficulty.pairsCount {
-
-            score += 1   // 🎯 FINAL BONUS POINT
-        }
-    }
-
     // MARK: - TIMER
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             self.secondsElapsed += 1
         }
     }
-
-    var formattedTime: String {
-        let minutes = secondsElapsed / 60
-        let seconds = secondsElapsed % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
 }
+

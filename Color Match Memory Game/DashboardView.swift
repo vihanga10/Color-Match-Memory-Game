@@ -31,20 +31,18 @@ struct DashboardView: View {
                     LevelButton(
                         title: "Beginner Level",
                         imageName: "beginner_icon",
-                        difficulty: .easy
-                    )
+                        difficulty: .beginner                    )
 
                     LevelButton(
                         title: "Intermediate Level",
                         imageName: "intermediate_icon",
-                        difficulty: .medium
+                        difficulty: .intermediate
                     )
 
                     LevelButton(
                         title: "Master Level",
                         imageName: "master_icon",
-                        difficulty: .hard
-                    )
+                        difficulty: .master                    )
 
                     Spacer()
 
@@ -117,33 +115,5 @@ struct LevelButton: View {
 
 
 
-
-enum Difficulty: Hashable {
-    case easy, medium, hard
-
-    var gridSize: (rows: Int, cols: Int) {
-        switch self {
-        case .easy: return (3, 3)
-        case .medium: return (5, 5)
-        case .hard: return (7, 7)
-        }
-    }
-
-    var pairsCount: Int {
-        switch self {
-        case .easy: return 4
-        case .medium: return 12
-        case .hard: return 24
-        }
-    }
-
-    var bonusTiles: Int {
-        1
-    }
-
-    var maxScore: Int {
-        pairsCount + bonusTiles
-    }
-}
 
 

@@ -14,7 +14,7 @@ struct GameView: View {
     private var columns: [GridItem] {
         Array(
             repeating: GridItem(.flexible(), spacing: 14),
-            count: difficulty.gridSize.cols
+            count: difficulty.cols
         )
     }
 
@@ -109,9 +109,9 @@ struct GameView: View {
 
     private var levelTitle: String {
         switch difficulty {
-        case .easy: return "BEGINNER LEVEL"
-        case .medium: return "INTERMEDIATE LEVEL"
-        case .hard: return "MASTER LEVEL"
+        case .beginner: return "BEGINNER LEVEL"
+        case .intermediate: return "INTERMEDIATE LEVEL"
+        case .master: return "MASTER LEVEL"
         }
     }
 
