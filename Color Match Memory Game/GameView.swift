@@ -1,7 +1,9 @@
 //  GameView.swift
 
-
 import SwiftUI
+
+
+
 
 struct GameView: View {
 
@@ -10,6 +12,8 @@ struct GameView: View {
     let playerAge: Int
 
     @StateObject private var viewModel = GameViewModel()
+    @State private var goToDashboard = false
+    @State private var stage: GameStage = .normal
 
     private var columns: [GridItem] {
         Array(
@@ -20,12 +24,9 @@ struct GameView: View {
 
     var body: some View {
         ZStack {
-            // Background
+
             LinearGradient(
-                colors: [
-                    Color.white,
-                    Color(red: 183/255, green: 211/255, blue: 228/255)
-                ],
+                colors: [Color.white, Color(red: 183/255, green: 211/255, blue: 228/255)],
                 startPoint: .top,
                 endPoint: .bottom
             )
@@ -33,32 +34,12 @@ struct GameView: View {
 
             VStack(spacing: 18) {
 
-                // 🔹 LEVEL TITLE (moved UP)
-                Text(levelTitle)
+                Text(difficulty.title)
                     .font(.system(size: 28, weight: .bold))
                     .foregroundColor(Color(red: 55/255, green: 100/255, blue: 140/255))
-                    .padding(.top, 20)
 
-                // Player name
-                Text("Hello \(playerName) !")
-                    .font(.system(size: 18, weight: .medium))
-                    .foregroundColor(Color(red: 55/255, green: 100/255, blue: 140/255))
-
-                // Level progress
-                HStack(spacing: 0) {
-                    levelCircle(number: 1, active: true)
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(.black)
-                        .frame(maxWidth: 40)
-                    levelCircle(number: 2, active: false)
-                    Rectangle()
-                        .frame(height: 1)
-                        .foregroundColor(.black)
-                        .frame(maxWidth: 40)
-                    levelCircle(number: 3, active: false)
-                }
-                .padding(.vertical, 10)
+                Text("Hello \(playerName) 👋")
+                    .font(.headline)
 
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 14) {
@@ -70,75 +51,65 @@ struct GameView: View {
                                 .aspectRatio(1, contentMode: .fit)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding()
                 }
 
-
-                // Stats
                 HStack {
-                    statView(title: "TIME", value: viewModel.formattedTime, color: .red)
-                    statView(title: "MOVES", value: "\(viewModel.moves)", color: .black)
-                    statView(title: "POINTS", value: "\(viewModel.score)", color: .blue)
+                    statView("TIME", viewModel.formattedTime, .red)
+                    statView("MOVES", "\(viewModel.moves)", .black)
+                    statView("POINTS", "\(viewModel.score)", .blue)
                 }
-                .padding(.top, 10)
 
-                // 🔴 RESET BUTTON (moved BELOW stats)
-                Button {
-                    viewModel.resetGame(difficulty: difficulty)
-                } label: {
-                    Text("RESET")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 45)
-                        .background(Color.red)
-                        .cornerRadius(6)
-                        .shadow(radius: 6)
+                Button("RESET") {
+                    viewModel.resetGame(difficulty: difficulty, stage: stage)
+
                 }
+                .frame(maxWidth: .infinity)
+                .frame(height: 45)
+                .background(Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(8)
                 .padding(.horizontal, 30)
-                .padding(.top, 10)
+            }
 
-                            }
+            // 🔔 WIN POPUP
+            if viewModel.showWinPopup {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+
+                WinPopupView(
+                    difficulty: difficulty,
+                    score: viewModel.score,
+                    time: viewModel.formattedTime,
+                    onYes: {
+                        viewModel.showWinPopup = false
+                        startNextLevel()
+                    },
+                    onNo: {
+                        viewModel.showWinPopup = false
+                        goToDashboard = true
+                    }
+                )
+            }
         }
         .onAppear {
-            viewModel.resetGame(difficulty: difficulty)
+            viewModel.resetGame(difficulty: difficulty, stage: stage)
+
         }
     }
 
     // MARK: - Helpers
 
-    private var levelTitle: String {
-        switch difficulty {
-        case .beginner: return "BEGINNER LEVEL"
-        case .intermediate: return "INTERMEDIATE LEVEL"
-        case .master: return "MASTER LEVEL"
-        }
-    }
-
-    private func statView(title: String, value: String, color: Color) -> some View {
-        VStack(spacing: 6) {
-            Text(title)
-                .font(.headline)
-            Text(value)
-                .font(.system(size: 16, weight: .medium))
-                .foregroundColor(color)
+    private func statView(_ title: String, _ value: String, _ color: Color) -> some View {
+        VStack {
+            Text(title).font(.headline)
+            Text(value).foregroundColor(color)
         }
         .frame(maxWidth: .infinity)
     }
 
-    private func levelCircle(number: Int, active: Bool) -> some View {
-        ZStack {
-            Circle()
-                .fill(
-                    active
-                    ? Color(red: 79/255, green: 113/255, blue: 145/255)
-                    : Color.gray.opacity(0.3)
-                )
-                .frame(width: 40, height: 40)
-
-            Text("\(number)")
-                .foregroundColor(active ? .white : .gray)
-                .fontWeight(.bold)
-        }
+    private func startNextLevel() {
+        stage = .timeAttack
+            viewModel.resetGame(difficulty: difficulty, stage: .timeAttack)
     }
 }

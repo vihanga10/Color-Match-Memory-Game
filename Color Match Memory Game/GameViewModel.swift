@@ -2,105 +2,115 @@
 
 //  GameViewModel.swift
 
-
-import Combine
 import SwiftUI
+import Combine
+
+
 
 class GameViewModel: ObservableObject {
 
+    // MARK: - UI STATE
     @Published var tiles: [Tile] = []
     @Published var score = 0
     @Published var moves = 0
-    @Published var secondsElapsed = 0
-    
 
-    private var firstSelectedIndex: Int?
+    // Timers
+    @Published var secondsElapsed = 0       // Level 1
+    @Published var timeRemaining = 0         // Level 2
+
+    // Popups
+    @Published var showWinPopup = false
+    @Published var showResultPopup = false
+    @Published var didWinTimeAttack = false
+
+    // Game control
+    @Published var stage: GameStage = .normal
+    @Published var gameLocked = false   // 🔒 freezes game when time up
+
+    // MARK: - INTERNAL STATE
     private var difficulty: Difficulty!
     private var timer: Timer?
+    private var firstSelectedIndex: Int?
+    private var level1FinishTime = 0
+
+    // MARK: - TIME FORMAT
     var formattedTime: String {
-        let minutes = secondsElapsed / 60
-        let seconds = secondsElapsed % 60
-        return String(format: "%02d:%02d", minutes, seconds)
+        let time = stage == .normal ? secondsElapsed : timeRemaining
+        return String(format: "%02d:%02d", time / 60, time % 60)
     }
 
-    // MARK: - GAME RESET
-    func resetGame(difficulty: Difficulty) {
+    // MARK: - START / RESET GAME
+    func resetGame(difficulty: Difficulty, stage: GameStage = .normal) {
         self.difficulty = difficulty
+        self.stage = stage
 
         score = 0
         moves = 0
         secondsElapsed = 0
         firstSelectedIndex = nil
+        gameLocked = false
 
         timer?.invalidate()
-        startTimer()
+
+        if stage == .normal {
+            startCountUpTimer()
+        } else {
+            timeRemaining = max(level1FinishTime - 1, 1)
+            startCountDownTimer()
+        }
 
         generateTiles()
     }
 
-    // MARK: - TILE GENERATION (THIS FIXES MISSING TILES)
+    // MARK: - TILE GENERATION
     private func generateTiles() {
-        var tilesArray: [Tile] = []
+        var array: [Tile] = []
+        let colors = Color.colorFamilies.flatMap { $0 }
 
-        // Flatten all colors
-        let baseColors = Color.colorFamilies.flatMap { $0 }
-
-        var generatedColors: [Color] = []
-        var colorIndex = 0
-
-        // 🔁 Reuse colors safely
-        while generatedColors.count < difficulty.pairsCount {
-            generatedColors.append(baseColors[colorIndex % baseColors.count])
-            colorIndex += 1
+        for i in 0..<difficulty.pairsCount {
+            let color = colors[i % colors.count]
+            array.append(Tile(color: color))
+            array.append(Tile(color: color))
         }
 
-        // Create pairs
-        for color in generatedColors {
-            tilesArray.append(Tile(color: color))
-            tilesArray.append(Tile(color: color))
-        }
-
-        // Add ONE bonus tile
-        tilesArray.append(Tile(color: nil, isBonus: true))
-
-        tilesArray.shuffle()
-        tiles = tilesArray
+        array.append(Tile(color: nil, isBonus: true))
+        array.shuffle()
+        tiles = array
     }
-
 
     // MARK: - TILE SELECTION
     func selectTile(_ index: Int) {
-        guard !tiles[index].isFlipped,
+        guard !gameLocked,
+              !tiles[index].isFlipped,
               !tiles[index].isMatched else { return }
 
         tiles[index].isFlipped = true
 
-        // BONUS TILE → NO FREE POINT
+                // 🎁 BONUS TILE (visual only)
         if tiles[index].isBonus {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.tiles[index].isFlipped = false
             }
             return
         }
 
-        if let firstIndex = firstSelectedIndex {
+
+        if let first = firstSelectedIndex {
             moves += 1
 
-            if tiles[firstIndex].color == tiles[index].color {
-                tiles[firstIndex].isMatched = true
+            if tiles[first].color == tiles[index].color {
+                tiles[first].isMatched = true
                 tiles[index].isMatched = true
-                score += 1
 
-                // 🎯 BONUS POINT ONLY WHEN ALL PAIRS MATCHED
-                let matchedPairs = tiles.filter { $0.isMatched }.count / 2
-                if matchedPairs == difficulty.pairsCount {
-                    score += 1 // bonus
-                }
+                score += stage == .normal
+                    ? difficulty.normalPointsPerPair
+                    : difficulty.timeAttackPointsPerPair
 
+                checkWin()
                 firstSelectedIndex = nil
             } else {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                    self.tiles[firstIndex].isFlipped = false
+                    self.tiles[first].isFlipped = false
                     self.tiles[index].isFlipped = false
                     self.firstSelectedIndex = nil
                 }
@@ -110,11 +120,52 @@ class GameViewModel: ObservableObject {
         }
     }
 
-    // MARK: - TIMER
-    private func startTimer() {
+    // MARK: - WIN CHECK
+    private func checkWin() {
+        let matchedPairs = tiles.filter { $0.isMatched }.count / 2
+
+        if matchedPairs == difficulty.pairsCount {
+            timer?.invalidate()
+
+            // ✅ ADD BONUS POINTS HERE
+            score += stage == .normal
+                ? difficulty.normalBonusPoints
+                : difficulty.timeAttackBonusPoints
+
+            if stage == .normal {
+                level1FinishTime = secondsElapsed
+                showWinPopup = true
+            } else {
+                didWinTimeAttack = true
+                showResultPopup = true
+            }
+        }
+    }
+
+
+    // MARK: - TIMERS
+    private func startCountUpTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             self.secondsElapsed += 1
         }
     }
-}
 
+    private func startCountDownTimer() {
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            self.timeRemaining -= 1
+            if self.timeRemaining <= 0 {
+                self.timer?.invalidate()
+                self.gameLocked = true
+                self.didWinTimeAttack = false
+                self.showResultPopup = true
+            }
+        }
+    }
+
+    // MARK: - RESULT DATA
+    func remainingTilesCount() -> Int {
+        tiles.filter { !$0.isMatched && !$0.isBonus }.count
+    }
+    
+    
+}

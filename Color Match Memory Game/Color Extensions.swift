@@ -1,14 +1,11 @@
-//
+
 //  Color Extensions.swift
-//  Color Match Memory Game
-//
-//  Created by Vihanga Madushamini on 2026-01-17.
-//
+
 import SwiftUI
 
 extension Color {
 
-    // MARK: - Color Families (Distinct groups)
+    
     static let redFamily: [Color] = [
         Color(red: 1.00, green: 0.60, blue: 0.60),
         Color(red: 0.96, green: 0.48, blue: 0.62)
@@ -49,7 +46,7 @@ extension Color {
         Color(red: 0.90, green: 0.80, blue: 0.70)
     ]
 
-    /// All families together
+    
     static let colorFamilies: [[Color]] = [
         redFamily,
         orangeFamily,

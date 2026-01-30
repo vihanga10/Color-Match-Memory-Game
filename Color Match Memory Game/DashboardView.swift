@@ -1,9 +1,6 @@
-//
+
 //  DashboardView.swift
-//  Color Match Memory Game
-//
-//  Created by Vihanga Madushamini on 2026-01-17.
-//
+
 import SwiftUI
 
 
@@ -14,7 +11,7 @@ struct DashboardView: View {
                 LinearGradient(
                     colors: [
                         Color.white,
-                        Color(red: 183/255, green: 211/255, blue: 228/255) // #B7D3E4
+                        Color(red: 183/255, green: 211/255, blue: 228/255) 
                     ],
                     startPoint: .top,
                     endPoint: .bottom
