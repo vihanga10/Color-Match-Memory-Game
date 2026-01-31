@@ -14,6 +14,8 @@ struct GameView: View {
     @StateObject private var viewModel = GameViewModel()
     @State private var goToDashboard = false
     @State private var stage: GameStage = .normal
+    @Environment(\.dismiss) private var dismiss
+
 
     private var columns: [GridItem] {
         Array(
@@ -88,9 +90,37 @@ struct GameView: View {
                     onNo: {
                         viewModel.showWinPopup = false
                         goToDashboard = true
+                        dismiss()
                     }
                 )
             }
+            
+            // ⏱ TIME ATTACK RESULT POPUP
+            if viewModel.showResultPopup {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+
+                TimeAttackResultView(
+                    didWin: viewModel.didWinTimeAttack,
+                    score: viewModel.score,
+                    maxScore: difficulty.timeAttackMaxScore,
+                    moves: viewModel.moves,
+                    timeUsed: viewModel.timeUsed,
+                    tilesRemaining: viewModel.remainingTilesCount(),
+                    onYes: {
+                            if viewModel.didWinTimeAttack {
+                                print("Go to Leaderboard")
+                            } else {
+                                viewModel.resetGame(difficulty: difficulty, stage: .timeAttack)
+                            }
+                        },
+
+                        onNo: {
+                            goToDashboard = true
+                            dismiss()
+                        }                )
+            }
+
         }
         .onAppear {
             viewModel.resetGame(difficulty: difficulty, stage: stage)

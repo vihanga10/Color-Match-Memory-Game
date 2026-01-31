@@ -10,7 +10,9 @@ struct TimeAttackResultView: View {
     let moves: Int
     let timeUsed: Int
     let tilesRemaining: Int
-    let onDismiss: () -> Void
+
+    let onYes: () -> Void
+    let onNo: () -> Void
 
     var body: some View {
         VStack(spacing: 16) {
@@ -23,18 +25,32 @@ struct TimeAttackResultView: View {
             Text("Time Used: \(timeUsed)s")
 
             if !didWin {
+                Text("Time spent: \(timeUsed)s")
+            } else {
                 Text("Tiles Left: \(tilesRemaining)")
                     .foregroundColor(.red)
             }
 
-            Button("OK") {
-                onDismiss()
+            Text(didWin ? "Do you want to view leaderboard?" : "Retry Level 2?")
+                .font(.headline)
+
+            HStack(spacing: 20) {
+                Button("NO") {
+                    onNo()
+                }
+                .frame(width: 120, height: 44)
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+
+                Button("YES") {
+                    onYes()
+                }
+                .frame(width: 120, height: 44)
+                .background(didWin ? Color.blue : Color.red)
+                .foregroundColor(.white)
+                .cornerRadius(10)
             }
-            .padding()
-            .frame(maxWidth: .infinity)
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
         }
         .padding()
         .frame(width: 320)

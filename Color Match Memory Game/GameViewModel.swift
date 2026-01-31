@@ -22,6 +22,8 @@ class GameViewModel: ObservableObject {
     @Published var showWinPopup = false
     @Published var showResultPopup = false
     @Published var didWinTimeAttack = false
+    @Published var timeUsed = 0
+
 
     // Game control
     @Published var stage: GameStage = .normal
@@ -47,6 +49,7 @@ class GameViewModel: ObservableObject {
         score = 0
         moves = 0
         secondsElapsed = 0
+        timeUsed = 0 
         firstSelectedIndex = nil
         gameLocked = false
 
@@ -153,6 +156,8 @@ class GameViewModel: ObservableObject {
     private func startCountDownTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             self.timeRemaining -= 1
+            self.timeUsed += 1
+
             if self.timeRemaining <= 0 {
                 self.timer?.invalidate()
                 self.gameLocked = true
@@ -160,6 +165,7 @@ class GameViewModel: ObservableObject {
                 self.showResultPopup = true
             }
         }
+
     }
 
     // MARK: - RESULT DATA
