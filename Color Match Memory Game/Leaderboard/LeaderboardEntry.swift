@@ -12,6 +12,7 @@ struct LeaderboardEntry: Identifiable, Codable {
     let timeSpent: Int    // in seconds
     let moves: Int
     let pairsCompleted: Int?  // only for Level 2 (timeAttack), optional
+    let tilesRemaining: Int? 
     let date: Date
 }
 

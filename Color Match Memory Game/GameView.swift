@@ -142,4 +142,21 @@ struct GameView: View {
         stage = .timeAttack
             viewModel.resetGame(difficulty: difficulty, stage: .timeAttack)
     }
+    
+    func saveResultToLeaderboard() {
+        let entry = LeaderboardEntry(
+            playerName: playerName,
+            difficulty: difficulty,
+            level: viewModel.stage,
+            score: viewModel.score,
+            timeSpent: viewModel.stage == .normal ? viewModel.secondsElapsed : viewModel.timeUsed,
+            moves: viewModel.moves,
+            pairsCompleted: viewModel.stage == .timeAttack ? difficulty.pairsCount - viewModel.remainingTilesCount() : nil,
+            tilesRemaining: viewModel.stage == .timeAttack ? viewModel.remainingTilesCount() : nil,
+            date: Date()
+        )
+        // Use a shared instance or create and keep one LeaderboardManager to add entry
+        LeaderboardManager().addEntry(entry)
+    }
+
 }

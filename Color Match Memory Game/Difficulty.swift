@@ -3,7 +3,7 @@
 
 import SwiftUI
 
-enum Difficulty {
+enum Difficulty : String, Codable {
     case beginner
     case intermediate
     case master

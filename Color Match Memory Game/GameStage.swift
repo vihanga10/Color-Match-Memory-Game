@@ -1,7 +1,7 @@
 
 //  GameStage.swift
 
-enum GameStage {
+enum GameStage : String, Codable {
     case normal        // Stage 1
     case timeAttack    // Stage 2
 }

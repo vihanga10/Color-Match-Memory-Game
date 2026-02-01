@@ -5,6 +5,7 @@ import SwiftUI
 
 
 struct DashboardView: View {
+    @State private var showLeaderboard = false
     var body: some View {
         NavigationStack {
             ZStack {
@@ -43,7 +44,9 @@ struct DashboardView: View {
 
                     Spacer()
 
-                    Button("LEADERBOARD") { }
+                    Button("LEADERBOARD") {
+                        showLeaderboard = true
+                    }
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(width: 360, height: 45)
@@ -53,6 +56,9 @@ struct DashboardView: View {
                         .cornerRadius(5)
                         .shadow(color: .black.opacity(0.25), radius: 6, y: 4)
                         .padding(.bottom, 30)
+                        .sheet(isPresented: $showLeaderboard) {
+                                            LeaderboardView()
+                                        }
                 }
             }
         }

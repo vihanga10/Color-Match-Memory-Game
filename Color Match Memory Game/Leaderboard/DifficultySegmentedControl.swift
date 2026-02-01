@@ -12,12 +12,13 @@ struct DifficultySegmentedControl: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            segment(title: "Beginner Level", value: .beginner)
+            segment(title: "Beginner", value: .beginner)
             Divider()
-            segment(title: "Intermediate Level", value: .intermediate)
+            segment(title: "Intermediate", value: .intermediate)
             Divider()
-            segment(title: "Master Level", value: .master)
+            segment(title: "Master", value: .master)
         }
+        .frame(height: 44)
         .background(Color.white)
         .cornerRadius(30)
         .shadow(radius: 5)
@@ -34,6 +35,7 @@ struct DifficultySegmentedControl: View {
                 .padding()
                 .background(selected == value ? Color.blue : Color.clear)
                 .cornerRadius(30)
+                .padding(.vertical, 6)
         }
     }
 }
