@@ -18,14 +18,14 @@ struct LeaderboardView: View {
                         dismiss()   // ⬅️ Go back to Dashboard
                     } label: {
                         Image(systemName: "chevron.left")
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 19, weight: .semibold))
                             .foregroundColor(Color(red: 52/255, green: 96/255, blue: 132/255))
                     }
 
                     Spacer()
                 }
                 .padding(.horizontal)
-                .padding(.top, 08)
+                .padding(.top, 10)
             
 
             // MARK: - Title
