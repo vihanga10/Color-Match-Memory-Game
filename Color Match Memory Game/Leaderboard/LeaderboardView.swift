@@ -7,8 +7,26 @@ struct LeaderboardView: View {
     @StateObject private var manager = LeaderboardManager()
     @State private var selectedDifficulty: Difficulty = .beginner
 
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         VStack(spacing: 20) {
+            
+            // MARK: - Back Button
+                HStack {
+                    Button {
+                        dismiss()   // ⬅️ Go back to Dashboard
+                    } label: {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(Color(red: 52/255, green: 96/255, blue: 132/255))
+                    }
+
+                    Spacer()
+                }
+                .padding(.horizontal)
+                .padding(.top, 08)
+            
 
             // MARK: - Title
             Text("LEADERBOARD")
